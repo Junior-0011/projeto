@@ -1,0 +1,575 @@
+<!DOCTYPE html>  <html lang="pt-BR">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />  
+  <title>Joãoflix</title>  
+  <style>  
+    * { margin: 0; padding: 0; box-sizing: border-box; }  
+    body {  
+      font-family: Arial, sans-serif;  
+      background-color: #000;  
+      color: #fff;  
+      overflow-x: hidden;  
+      overflow-y: auto;  
+      height: 100vh;  
+    }  
+    body.light {  
+      background-color: #f5f5f5;  
+      color: #000;  
+    }  
+    body.light header,  
+    body.light .sidebar,  
+    body.light .card-filme,  
+    body.light .modal-content {  
+      background: #fff;  
+      color: #000;  
+    }  
+    body.light .card-filme p,  
+    body.light .info h4 {  
+      color: #222;  
+    }  
+    body.light .sidebar button {  
+      color: #333;  
+    }  
+    body.light .sidebar button:hover {  
+      background: #eee;  
+      color: #000;  
+    }  .intro {  
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black;  
+  display: flex; justify-content: center; align-items: center; z-index: 9999;  
+  animation: fadeOut 2s ease 3s forwards;  
+}  
+.intro h1 {  
+  font-size: 4em; color: #e50914; opacity: 0; animation: fadeIn 2s ease forwards;  
+}  
+@keyframes fadeIn { to { opacity: 1; } }  
+@keyframes fadeOut { to { opacity: 0; visibility: hidden; } }  
+
+#login, #selecaoPerfis, #catalogo { display: none; }
+
+#login {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+height: 100vh;
+gap: 15px;
+background-image: url('https://i.postimg.cc/m21P1P9m/filmes-da-netflix-capa.jpg');
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+backdrop-filter: brightness(0.6);
+}
+#login input {
+background-color: rgba(0, 0, 0, 0.8);
+color: white;
+border: 1px solid #555;
+border-radius: 4px;
+padding: 10px;
+width: 280px;
+font-size: 16px;
+box-shadow: 0 0 8px #000;
+}
+
+#login button {
+background-color: #e50914;
+color: white;
+border: none;
+font-weight: bold;
+font-size: 16px;
+padding: 10px 20px;
+border-radius: 4px;
+cursor: pointer;
+box-shadow: 0 0 10px #e50914;
+transition: background 0.3s ease;
+}
+
+#login button:hover {
+background-color: #b20710;
+}
+}
+#login input {
+padding: 10px; width: 280px; border-radius: 4px; border: none; font-size: 16px;
+}
+#login button {
+padding: 10px 20px; background: #e50914; border: none; color: white;
+font-weight: bold; font-size: 16px; cursor: pointer;
+}
+
+#selecaoPerfis {  
+  display: flex; flex-direction: column; align-items: center; justify-content: center;  
+  height: 100vh; gap: 40px;  
+}  
+#selecaoPerfis h2 { font-size: 2.5rem; margin-bottom: 20px; }  
+.perfis {  
+  display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;  
+}  
+.perfil {  
+  display: flex; flex-direction: column; align-items: center; cursor: pointer;  
+  transition: transform 0.3s; width: 140px;  
+}  
+.perfil img {  
+  width: 140px; height: 140px; border-radius: 10px; object-fit: cover;  
+  box-shadow: 0 0 10px #e50914; transition: transform 0.3s;  
+}  
+.perfil:hover { transform: scale(1.05); }  
+.perfil span {  
+  margin-top: 12px; font-size: 1.2rem; font-weight: bold; color: white;  
+  text-align: center;  
+}  
+
+header {  
+  position: fixed; top: 0; left: 220px; right: 0; height: 60px;  
+  background: #141414; display: flex; align-items: center; justify-content: space-between;  
+  padding: 0 30px; z-index: 20; border-bottom: 1px solid #222;  
+}  
+header h1 { color: #e50914; font-size: 24px; font-weight: 900; }  
+#searchBar {  
+  background: #333; border: none; padding: 8px 12px;  
+  border-radius: 4px; width: 280px; color: white; font-size: 14px;  
+}  
+
+.avatar-wrapper {  
+  position: relative;  
+  display: inline-block;  
+}  
+.avatar-menu {  
+  display: none;  
+  position: absolute;  
+  right: 0;  
+  top: 60px;  
+  background: #222;  
+  border: 1px solid #444;  
+  border-radius: 6px;  
+  overflow: hidden;  
+  z-index: 999;  
+  min-width: 180px;  
+}  
+.avatar-menu button {  
+  background: none;  
+  border: none;  
+  color: #fff;  
+  padding: 12px 16px;  
+  width: 100%;  
+  text-align: left;  
+  cursor: pointer;  
+  transition: background 0.2s;  
+}  
+.avatar-menu button:hover {  
+  background: #444;  
+}  
+
+.sidebar {  
+  position: fixed; top: 0; left: 0; height: 100vh; width: 220px; background: #111; padding: 20px 0;  
+  display: flex; flex-direction: column; align-items: center; overflow-y: auto;  
+}  
+.sidebar h2 { color: #e50914; font-size: 28px; margin-bottom: 20px; }  
+.sidebar img {  
+  width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px;  
+  object-fit: cover; box-shadow: 0 0 15px #e50914;  
+}  
+.sidebar button {  
+  background: none; border: none; color: #bbb; font-size: 16px;  
+  text-align: left; padding: 10px 30px; width: 100%; cursor: pointer; transition: .3s;  
+}  
+.sidebar button:hover, .sidebar button.active {  
+  color: white; background: #333;  
+}  
+
+.main {  
+  margin-left: 220px; padding: 80px 30px 30px;  
+}  
+#destaque {
+  width: 100%;
+  height: 500px;
+  margin-top: 60px;
+  padding: 40px 30px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  color: white;
+  box-shadow: inset 0 -80px 150px rgba(0, 0, 0, 0.7);
+}
+
+#destaque .conteudo-destaque {
+  max-width: 600px;
+  z-index: 2;
+}
+
+#destaque h2 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+#destaque p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+#destaque button {
+  background-color: #e50914;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #e50914;
+  transition: background 0.3s ease;
+}
+
+#destaque button:hover {
+  background-color: #b20710;
+}
+.categoria { margin-bottom: 40px; }  
+.categoria h3 {  
+  margin-bottom: 10px; font-size: 1.6rem; padding-left: 10px;  
+}  
+.scroll-horizontal {  
+  display: flex; overflow-x: auto; gap: 15px; padding-left: 10px; scroll-behavior: smooth;  
+}  
+.scroll-horizontal::-webkit-scrollbar { height: 8px; }  
+.scroll-horizontal::-webkit-scrollbar-thumb {  
+  background: #555; border-radius: 10px;  
+}  
+
+.card-filme {  
+  flex: 0 0 auto; width: 160px; background: #222; border-radius: 8px;  
+  display: flex; flex-direction: column; overflow: hidden;  
+  box-shadow: 0 0 10px #0008; cursor: pointer; transition: transform 0.3s;  
+}  
+.card-filme:hover {  
+  transform: scale(1.07); box-shadow: 0 0 15px #e50914;  
+}  
+.card-filme img {  
+  width: 100%; height: 240px; object-fit: cover;  
+}  
+.card-filme .info {  
+  padding: 10px; font-size: 13px; flex: 1;  
+  display: flex; flex-direction: column; justify-content: space-between;  
+}  
+.card-filme .info h4 { font-size: 15px; margin-bottom: 6px; }  
+.card-filme .info p {  
+  font-size: 12px; color: #ccc; display: -webkit-box;  
+  -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;  
+}  
+.btn-trailer {  
+  margin-top: 6px; background-color: #e50914; border: none;  
+  color: white; padding: 6px 12px; font-size: 13px;  
+  border-radius: 4px; cursor: pointer;  
+}  
+
+.modal {  
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;  
+  background: rgba(0,0,0,0.85); display: none;  
+  align-items: center; justify-content: center; z-index: 99999;  
+}  
+.modal-content {  
+  position: relative; width: 90%; max-width: 900px; background: #000; padding: 20px;  
+  border-radius: 8px;  
+}  
+.modal-content iframe {  
+  width: 100%; height: 480px; border: none; border-radius: 8px;  
+}  
+.modal-content .close {  
+  position: absolute; top: 10px; right: 15px;  
+  background: #e50914; border: none; color: white;  
+  font-size: 24px; padding: 6px 12px;  
+  cursor: pointer; border-radius: 6px;  
+}  
+#configModal select, #configModal button {  
+  margin-top: 10px;  
+  background: #e50914;  
+  border: none;  
+  color: white;  
+  padding: 8px 12px;  
+  border-radius: 4px;  
+  font-size: 14px;  
+  cursor: pointer;  
+}  
+#configModal button:hover {  
+  background: #c40812;  
+}
+
+  </style>  
+</head>  
+<body>  
+  <div class="intro"><h1>JOÃOFLIX</h1></div>    <div id="login">  
+    <input type="email" placeholder="Email" id="email" />  
+    <input type="password" placeholder="Senha" id="senha" />  
+    <button onclick="fazerLogin()">Entrar</button>  
+  </div>    <div id="selecaoPerfis">  
+    <h2>Quem está assistindo?</h2>  
+    <div class="perfis" id="listaPerfis"></div>  
+  </div>    <div id="catalogo">  
+    <header>  
+      <h1>Joãoflix</h1>  
+      <input type="text" id="searchBar" placeholder="Buscar título..." oninput="filtrarFilmes()" />  
+      <div class="avatar-wrapper">  
+        <img id="avatarSidebar" src="" alt="Avatar" style="width:50px; height:50px; border-radius:50%; box-shadow: 0 0 8px #e50914; cursor:pointer;" onclick="toggleAvatarMenu()" />  
+        <div class="avatar-menu" id="avatarMenu">  
+          <button onclick="mostrarSelecaoPerfis()">👥 Trocar de Perfil</button>  
+          <button onclick="abrirConfiguracoes()">⚙️ Configurações</button>  
+          <button onclick="sair()">🚪 Sair</button>  
+        </div>  
+      </div>  
+    </header>  
+    <div class="sidebar" id="sidebar"><h2>Categorias</h2></div>  
+   <!-- Destaque principal -->  
+<div id="destaque">  
+  <div class="conteudo-destaque">  
+    <h2 id="destaque-titulo">Nome do Filme</h2>  
+    <p id="destaque-descricao">Descrição do filme em destaque.</p>  
+    <button onclick="mostrarTrailerDestaque()">▶ Assistir Trailer</button>  
+  </div>  
+</div>  
+    <div class="main" id="main"></div>  
+  </div>    <!-- Modal Trailer -->    <div class="modal" id="modal">  
+    <div class="modal-content">  
+      <button class="close" onclick="fecharModal()">×</button>  
+      <div id="modal-body"></div>  
+    </div>  
+  </div>    <!-- Modal Configurações -->    <div class="modal" id="configModal">  
+    <div class="modal-content">  
+      <button class="close" onclick="fecharConfig()">×</button>  
+      <h2 style="color:white; margin-bottom: 15px;">Configurações</h2>  
+      <div style="margin-bottom: 20px;">  
+        <label style="color:white;">🌗 Tema:</label><br>  
+        <button onclick="mudarTema('dark')">Escuro</button>  
+        <button onclick="mudarTema('light')">Claro</button>  
+      </div>  
+      <div>  
+        <label style="color:white;">🌍 Idioma:</label><br>  
+        <select id="idiomaSelect" onchange="mudarIdioma()">  
+          <option value="pt-BR">Português</option>  
+          <option value="en-US">English</option>  
+          <option value="es-ES">Español</option>  
+        </select>  
+      </div>  
+    </div>  
+  </div>  <script>  
+  const API_KEY = "65e7972a036cf9f4506c1f837a38a9ae";  
+  const IMG_BASE = "https://image.tmdb.org/t/p/w300";  
+  let perfilAtivo = null;  
+  let categorias = [];  
+  let filmesPorCategoria = {};  
+  let idiomaAtual = localStorage.getItem("idioma") || "pt-BR";  
+  let perfis = {  
+    mirian:"https://i.postimg.cc/KvC37NYk/IMG20250801105332.jpg",  
+    sonia: "https://i.postimg.cc/SKy5gcTq/IMG20250801105254.jpg",  
+    requena: "https://i.postimg.cc/zXC88MgS/image.png",  
+    victoria: "https://i.postimg.cc/R0ZB8c98/victoria.jpg",  
+    isabela: "https://i.postimg.cc/Rq5C5jhZ/isabela.jpg",  
+    beatriz: "https://i.postimg.cc/2jGHK4qn/beatriz.jpg",  
+    pedro: "https://i.postimg.cc/xjxwbyT6/pedro.jpg",  
+    joao: "https://i.postimg.cc/wM6VRmRX/jo-o.jpg",  
+    kaylan: "https://i.postimg.cc/0yVR9jCF/kaylan.jpg",  
+    junior: "https://i.postimg.cc/YqxCrw8J/junior.jpg"  
+  };  
+  
+  function mostrarPerfis() {  
+    const lista = document.getElementById("listaPerfis");  
+    lista.innerHTML = "";  
+    for (const [nome, url] of Object.entries(perfis)) {  
+      const div = document.createElement("div");  
+      div.classList.add("perfil");  
+      div.onclick = () => entrarPerfil(nome);  
+      div.innerHTML = `<img src="${url}" alt="${nome}"><span>${nome}</span>`;  
+      lista.appendChild(div);  
+    }  
+  }  
+  
+  function fazerLogin() {  
+    const email = document.getElementById("email").value.trim();  
+    const senha = document.getElementById("senha").value.trim();  
+    if (!email || !senha) return alert("Preencha o email e a senha.");  
+    document.getElementById("login").style.display = "none";  
+    mostrarSelecaoPerfis();  
+  }  
+  
+  function mostrarSelecaoPerfis() {  
+    document.getElementById("catalogo").style.display = "none";  
+    document.getElementById("login").style.display = "none";  
+    document.getElementById("selecaoPerfis").style.display = "flex";  
+    document.getElementById("avatarMenu").style.display = "none";  
+  }  
+  
+  async function entrarPerfil(nome) {  
+    perfilAtivo = nome;  
+    document.getElementById("selecaoPerfis").style.display = "none";  
+    document.getElementById("catalogo").style.display = "block";  
+    document.getElementById("avatarSidebar").src = perfis[nome];  
+    await carregarCategoriasIdioma(idiomaAtual);  
+    await carregarFilmesIdioma(idiomaAtual);  
+    criarSidebarCategorias();  
+  }  
+  
+  async function carregarCategoriasIdioma(lang) {  
+    const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=${lang}`);  
+    const data = await res.json();  
+    categorias = data.genres;  
+  }  
+  
+  async function carregarFilmesIdioma(lang) {  
+    filmesPorCategoria = {};  
+    for (const cat of categorias) {  
+      try {  
+        const res = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${cat.id}&language=${lang}&sort_by=popularity.desc`);  
+        const data = await res.json();  
+        filmesPorCategoria[cat.name] = data.results.slice(0, 10);  
+      } catch {  
+        filmesPorCategoria[cat.name] = [];  
+      }  
+    }  
+    montarCatalogo();  
+    exibirFilmeDestaque(); // ✅ chamada correta aqui  
+  }  
+  
+  function montarCatalogo() {  
+    const main = document.getElementById("main");  
+    main.innerHTML = "";  
+    categorias.forEach(cat => {  
+      const filmes = filmesPorCategoria[cat.name];  
+      if (!filmes || filmes.length === 0) return;  
+      const section = document.createElement("section");  
+      section.classList.add("categoria");  
+      section.id = `cat-${cat.id}`;  
+      section.innerHTML = `<h3>${cat.name}</h3>`;  
+      const scroll = document.createElement("div");  
+      scroll.classList.add("scroll-horizontal");  
+      filmes.forEach(filme => {  
+        const poster = filme.poster_path ? IMG_BASE + filme.poster_path : "https://via.placeholder.com/300x450?text=Sem+Imagem";  
+        const descricao = filme.overview || "Sem descrição.";  
+        scroll.innerHTML += `  
+          <div class="card-filme">  
+            <img src="${poster}" alt="${filme.title}" />  
+            <div class="info">  
+              <h4>${filme.title}</h4>  
+              <p>${descricao}</p>  
+              <button class="btn-trailer" onclick="mostrarTrailer(${filme.id})">▶ Trailer</button>  
+            </div>  
+          </div>  
+        `;  
+      });  
+      section.appendChild(scroll);  
+      main.appendChild(section);  
+    });  
+  }  
+  
+  function criarSidebarCategorias() {  
+    const sidebar = document.getElementById("sidebar");  
+    sidebar.innerHTML = "<h2>Categorias</h2>";  
+    categorias.forEach(cat => {  
+      const btn = document.createElement("button");  
+      btn.textContent = cat.name;  
+      btn.onclick = () => {  
+        const target = document.getElementById(`cat-${cat.id}`);  
+        if (target) {  
+          target.scrollIntoView({ behavior: "smooth" });  
+          sidebar.querySelectorAll("button").forEach(b => b.classList.remove("active"));  
+          btn.classList.add("active");  
+        }  
+      };  
+      sidebar.appendChild(btn);  
+    });  
+  }  
+  
+  function filtrarFilmes() {  
+    const termo = document.getElementById("searchBar").value.toLowerCase();  
+    const cards = document.querySelectorAll(".card-filme");  
+    cards.forEach(card => {  
+      const titulo = card.querySelector("h4").textContent.toLowerCase();  
+      card.style.display = titulo.includes(termo) ? "flex" : "none";  
+    });  
+  }  
+  
+  async function mostrarTrailer(id) {  
+    const res = await fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}&language=${idiomaAtual}`);  
+    const data = await res.json();  
+    const video = data.results.find(v => v.type === "Trailer" && v.site === "YouTube");  
+    const body = document.getElementById("modal-body");  
+    body.innerHTML = video  
+      ? `<iframe src="https://www.youtube.com/embed/${video.key}" allowfullscreen></iframe>`  
+      : `<p style="color:white; text-align:center;">Trailer não disponível.</p>`;  
+    document.getElementById("modal").style.display = "flex";  
+  }  
+  
+  function fecharModal() {  
+    document.getElementById("modal").style.display = "none";  
+    document.getElementById("modal-body").innerHTML = "";  
+  }  
+  
+  function sair() {  
+    perfilAtivo = null;  
+    document.getElementById("catalogo").style.display = "none";  
+    document.getElementById("login").style.display = "flex";  
+    document.getElementById("avatarMenu").style.display = "none";  
+  }  
+  
+  function toggleAvatarMenu() {  
+    const menu = document.getElementById("avatarMenu");  
+    menu.style.display = menu.style.display === "block" ? "none" : "block";  
+  }  
+  
+  function abrirConfiguracoes() {  
+    document.getElementById("configModal").style.display = "flex";  
+    document.getElementById("avatarMenu").style.display = "none";  
+    document.getElementById("idiomaSelect").value = idiomaAtual;  
+  }  
+  
+  function fecharConfig() {  
+    document.getElementById("configModal").style.display = "none";  
+  }  
+  
+  function mudarTema(modo) {  
+    document.body.classList.toggle("light", modo === "light");  
+    localStorage.setItem("tema", modo);  
+  }  
+  
+  function mudarIdioma() {  
+    const novoIdioma = document.getElementById("idiomaSelect").value;  
+    idiomaAtual = novoIdioma;  
+    localStorage.setItem("idioma", novoIdioma);  
+    carregarCategoriasIdioma(novoIdioma).then(() => {  
+      carregarFilmesIdioma(novoIdioma);  
+      criarSidebarCategorias();  
+    });  
+  }  
+  
+  // ✅ Função fora de mudarIdioma, posição correta:  
+  function exibirFilmeDestaque() {  
+    const todasCategorias = Object.values(filmesPorCategoria).flat();  
+    if (todasCategorias.length === 0) return;  
+  
+    const filmeAleatorio = todasCategorias[Math.floor(Math.random() * todasCategorias.length)];  
+  
+    const poster = filmeAleatorio.backdrop_path  
+      ? `https://image.tmdb.org/t/p/original${filmeAleatorio.backdrop_path}`  
+      : "https://via.placeholder.com/1280x720?text=Sem+Imagem";  
+  
+    const titulo = filmeAleatorio.title || "Sem título";  
+    const descricao = filmeAleatorio.overview || "Sem descrição disponível.";  
+  
+    document.getElementById("destaque").style.background = `linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.2)), url('${poster}') no-repeat center/cover`;  
+    document.getElementById("destaque-titulo").textContent = titulo;  
+    document.getElementById("destaque-descricao").textContent = descricao;  
+    document.getElementById("destaque").setAttribute("data-id", filmeAleatorio.id);  
+  }  
+  
+  // Mostra trailer do destaque  
+  function mostrarTrailerDestaque() {  
+    const id = document.getElementById("destaque").getAttribute("data-id");  
+    if (id) mostrarTrailer(id);  
+  }  
+  
+  window.onload = () => {  
+    mostrarPerfis();  
+    const tema = localStorage.getItem("tema") || "dark";  
+    document.body.classList.toggle("light", tema === "light");  
+    idiomaAtual = localStorage.getItem("idioma") || "pt-BR";  
+  };  
+</script>  </body>  
+</html>
