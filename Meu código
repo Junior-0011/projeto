@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Joãoflix</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; background-color: #000; color: #fff; overflow-x: hidden; overflow-y: auto; height: 100vh; }
+body.light { background-color: #f5f5f5; color: #000; }
+body.light header, body.light .sidebar, body.light .card-filme, body.light .modal-content { background: #fff; color: #000; }
+body.light .card-filme p, body.light .info h4 { color: #222; }
+body.light .sidebar button { color: #333; }
+body.light .sidebar button:hover { background: #eee; color: #000; }
+.intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; display: flex; justify-content: center; align-items: center; z-index: 9999; animation: fadeOut 2s ease 3s forwards; }
+.intro h1 { font-size: 4em; color: #e50914; opacity: 0; animation: fadeIn 2s ease forwards; }
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+#login, #selecaoPerfis, #catalogo { display: none; }
+#login { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 15px; background-image: url('https://i.postimg.cc/m21P1P9m/filmes-da-netflix-capa.jpg'); background-size: cover; background-position: center; backdrop-filter: brightness(0.6); }
+#login input { background-color: rgba(0,0,0,0.8); color: white; border: 1px solid #555; border-radius: 4px; padding: 10px; width: 280px; font-size: 16px; box-shadow: 0 0 8px #000; }
+#login button { background-color: #e50914; color: white; border: none; font-weight: bold; font-size: 16px; padding: 10px 20px; border-radius: 4px; cursor: pointer; box-shadow: 0 0 10px #e50914; transition: background 0.3s ease; }
+#login button:hover { background-color: #b20710; }
+
+#selecaoPerfis { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 40px; }
+#selecaoPerfis h2 { font-size: 2.5rem; margin-bottom: 20px; }
+.perfis { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+.perfil { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.3s; width: 140px; }
+.perfil img { width: 140px; height: 140px; border-radius: 10px; object-fit: cover; box-shadow: 0 0 10px #e50914; transition: transform 0.3s; }
+.perfil:hover { transform: scale(1.05); }
+.perfil span { margin-top: 12px; font-size: 1.2rem; font-weight: bold; color: white; text-align: center; }
+
+header { position: fixed; top: 0; left: 220px; right: 0; height: 60px; background: #141414; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; z-index: 20; border-bottom: 1px solid #222; }
+header h1 { color: #e50914; font-size: 24px; font-weight: 900; }
+#searchBar { background: #333; border: none; padding: 8px 12px; border-radius: 4px; width: 280px; color: white; font-size: 14px; }
+
+.avatar-wrapper { position: relative; display: inline-block; }
+.avatar-menu { display: none; position: absolute; right: 0; top: 60px; background: #222; border: 1px solid #444; border-radius: 6px; overflow: hidden; z-index: 999; min-width: 180px; }
+.avatar-menu button { background: none; border: none; color: #fff; padding: 12px 16px; width: 100%; text-align: left; cursor: pointer; transition: background 0.2s; }
+.avatar-menu button:hover { background: #444; }
+
+.sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 220px; background: #111; padding: 20px 0; display: flex; flex-direction: column; align-items: center; overflow-y: auto; transition: width 0.3s ease; }
+.sidebar.collapsed { width: 0; padding: 0; overflow: hidden; }
+.sidebar h2 { color: #e50914; font-size: 28px; margin-bottom: 20px; }
+.sidebar img { width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px; object-fit: cover; box-shadow: 0 0 15px #e50914; }
+.sidebar button { background: none; border: none; color: #bbb; font-size: 16px; text-align: left; padding: 10px 30px; width: 100%; cursor: pointer; transition: .3s; }
+.sidebar button:hover, .sidebar button.active { color: white; background: #333; }
+
+.main { margin-left: 220px; padding: 80px 30px 30px; transition: margin-left 0.3s ease; }
+.main.expanded { margin-left: 0; }
+
+#destaque { width: 100%; height: 500px; margin-top: 60px; padding: 40px 30px; background-size: cover; background-position: center; background-repeat: no-repeat; position: relative; display: flex; align-items: flex-end; color: white; box-shadow: inset 0 -80px 150px rgba(0,0,0,0.7); transition: background-image 0.5s ease; }
+#destaque .conteudo-destaque { max-width: 600px; z-index: 2; }
+#destaque h2 { font-size: 3rem; margin-bottom: 10px; }
+#destaque p { font-size: 1.2rem; margin-bottom: 20px; }
+#destaque button { background-color: #e50914; border: none; padding: 10px 20px; font-size: 1rem; color: white; border-radius: 4px; cursor: pointer; box-shadow: 0 0 10px #e50914; transition: background 0.3s ease; }
+#destaque button:hover { background-color: #b20710; }
+#destaque .seta { position: absolute; top: 50%; transform: translateY(-50%); font-size: 3rem; cursor: pointer; color: white; user-select: none; }
+#destaque .seta-esq { left: 20px; }
+#destaque .seta-dir { right: 20px; }
+
+.categoria { margin-bottom: 40px; scroll-margin-top: 100px; }
+.categoria h3 { margin-bottom: 10px; font-size: 1.6rem; padding-left: 10px; }
+.scroll-horizontal { display: flex; overflow-x: auto; gap: 15px; padding-left: 10px; scroll-behavior: smooth; }
+.scroll-horizontal::-webkit-scrollbar { height: 8px; }
+.scroll-horizontal::-webkit-scrollbar-thumb { background: #555; border-radius: 10px; }
+
+.card-filme { flex: 0 0 auto; width: 160px; background: #222; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 10px #0008; cursor: pointer; transition: transform 0.3s; }
+.card-filme:hover { transform: scale(1.07); box-shadow: 0 0 15px #e50914; }
+.card-filme img { width: 100%; height: 240px; object-fit: cover; }
+.card-filme .info { padding: 10px; font-size: 13px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.card-filme .info h4 { font-size: 15px; margin-bottom: 6px; }
+.card-filme .info p { font-size: 12px; color: #ccc; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.btn-trailer { margin-top: 6px; background-color: #e50914; border: none; color: white; padding: 6px 12px; font-size: 13px; border-radius: 4px; cursor: pointer; }
+
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 99999; }
+.modal-content { position: relative; width: 90%; max-width: 900px; background: #000; padding: 20px; border-radius: 8px; }
+.modal-content iframe { width: 100%; height: 480px; border: none; border-radius: 8px; }
+.modal-content .close { position: absolute; top: 10px; right: 15px; background: #e50914; border: none; color: white; font-size: 24px; padding: 6px 12px; cursor: pointer; border-radius: 6px; }
+
+#configModal select, #configModal button { margin-top: 10px; background: #e50914; border: none; color: white; padding: 8px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+#configModal button:hover { background: #c40812; }
+
+.toggle-sidebar { position: fixed; top: 15px; left: 10px; z-index: 30; background: #e50914; border: none; color: white; font-size: 26px; padding: 6px 12px; border-radius: 6px; cursor: pointer; box-shadow: 0 0 10px #e50914; transition: background 0.3s ease; }
+.toggle-sidebar:hover { background: #b20710; }
+
+/* Loading spinner para destaque */
+.loading-featured { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  height: 100%; 
+  color: white; 
+  font-size: 1.2rem; 
+}
+</style>
+</head>
+<body>
+<div class="intro"><h1>JOÃOFLIX</h1></div>
+
+<div id="login">
+  <input type="email" placeholder="Email" id="email" />
+  <input type="password" placeholder="Senha" id="senha" />
+  <button onclick="fazerLogin()">Entrar</button>
+</div>
+
+<div id="selecaoPerfis">
+  <h2>Quem está assistindo?</h2>
+  <div class="perfis" id="listaPerfis"></div>
+</div>
+
+<div id="catalogo">
+  <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+  <header>
+    <h1>Joãoflix</h1>
+    <input type="text" id="searchBar" placeholder="Buscar título..." oninput="filtrarFilmes()" />
+    <div class="avatar-wrapper">
+      <img id="avatarSidebar" src="" alt="Avatar" style="width:50px; height:50px; border-radius:50%; box-shadow: 0 0 8px #e50914; cursor:pointer;" onclick="toggleAvatarMenu()" />
+      <div class="avatar-menu" id="avatarMenu">
+        <button onclick="mostrarSelecaoPerfis()">👥 Trocar de Perfil</button>
+        <button onclick="abrirConfiguracoes()">⚙️ Configurações</button>
+        <button onclick="sair()">🚪 Sair</button>
+      </div>
+    </div>
+  </header>
+  <div class="sidebar" id="sidebar"><h2>Categorias</h2></div>
+  <div class="main" id="main">
+    <div id="destaque">
+      <span class="seta seta-esq" onclick="mudarDestaque(-1)">&#10094;</span>
+      <span class="seta seta-dir" onclick="mudarDestaque(1)">&#10095;</span>
+      <div class="conteudo-destaque">
+        <h2 id="destaque-titulo">Carregando filmes com trailers...</h2>
+        <p id="destaque-descricao">Aguarde enquanto buscamos filmes com trailers disponíveis</p>
+        <button id="btn-destaque-trailer">▶ Assistir Trailer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <button class="close" onclick="fecharModal()">×</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div class="modal" id="configModal">
+  <div class="modal-content">
+    <button class="close" onclick="fecharConfig()">×</button>
+    <h2 style="color:white; margin-bottom: 15px;">Configurações</h2>
+    <div style="margin-bottom: 20px;">
+      <label style="color:white;">🌗 Tema:</label><br>
+      <button onclick="mudarTema('dark')">Escuro</button>
+      <button onclick="mudarTema('light')">Claro</button>
+    </div>
+    <div>
+      <label style="color:white;">🌍 Idioma:</label><br>
+      <select id="idiomaSelect" onchange="mudarIdioma()">
+        <option value="pt-BR">Português</option>
+        <option value="en-US">English</option>
+        <option value="es-ES">Español</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_KEY = "65e7972a036cf9f4506c1f837a38a9ae";
+const IMG_BASE = "https://image.tmdb.org/t/p/w500";
+
+let activeProfile = null;
+let categories = [];
+let moviesByCategory = {};
+let currentLanguage = "pt-BR";
+let featuredIndex = 0;
+let featuredInterval = null;
+let featuredMoviesWithTrailers = []; // NOVO: Array apenas com filmes que têm trailers
+let isLoadingFeatured = false; // Flag para controlar carregamento
+
+const movieCategories = [
+  {id: 28, name: "Ação"}, 
+  {id: 35, name: "Comédia"}, 
+  {id: 18, name: "Drama"},
+  {id: 10749, name: "Romance"}, 
+  {id: 27, name: "Terror"}, 
+  {id: 16, name: "Animação"},
+  {id: 878, name: "Ficção Científica"}, 
+  {id: 99, name: "Documentário"}, 
+  {id: 12, name: "Aventura"},
+  {id: 14, name: "Fantasia"}, 
+  {id: 80, name: "Crime"}, 
+  {id: 36, name: "História"},
+  {id: 10751, name: "Família"}, 
+  {id: 10402, name: "Música"}, 
+  {id: 53, name: "Suspense"}, 
+  {id: 10752, name: "Guerra"}, 
+  {id: 37, name: "Faroeste"}
+];
+
+const profiles = {
+  mirian:"https://i.postimg.cc/KvC37NYk/IMG20250801105332.jpg",
+  sonia: "https://i.postimg.cc/SKy5gcTq/IMG20250801105254.jpg",
+  requena: "https://i.postimg.cc/zXC88MgS/image.png",
+  victoria: "https://i.postimg.cc/R0ZB8c98/victoria.jpg",
+  isabela: "https://i.postimg.cc/Rq5C5jhZ/isabela.jpg",
+  beatriz: "https://i.postimg.cc/2jGHK4qn/beatriz.jpg",
+  pedro: "https://i.postimg.cc/xjxwbyT6/pedro.jpg",
+  joao: "https://i.postimg.cc/wM6VRmRX/jo-o.jpg",
+  kaylan: "https://i.postimg.cc/0yVR9jCF/kaylan.jpg",
+  junior: "https://i.postimg.cc/YqxCrw8J/junior.jpg"
+};
+
+function mostrarPerfis() { 
+  const lista = document.getElementById("listaPerfis"); 
+  lista.innerHTML = "";
+  for(let name in profiles){
+    const div = document.createElement("div");
+    div.classList.add("perfil");
+    div.innerHTML = `<img src="${profiles[name]}" /><span>${name}</span>`;
+    div.onclick = () => selecionarPerfil(name);
+    lista.appendChild(div);
+  }
+}
+
+function selecionarPerfil(name){
+  activeProfile = name;
+  document.getElementById("avatarSidebar").src = profiles[name];
+  document.getElementById("login").style.display = "none";
+  document.getElementById("selecaoPerfis").style.display = "none";
+  document.getElementById("catalogo").style.display = "block";
+  loadCategories();
+}
+
+function fazerLogin(){ 
+  const email = document.getElementById("email").value; 
+  const password = document.getElementById("senha").value; 
+  if(email && password){ 
+    mostrarPerfis(); 
+    document.getElementById("login").style.display = "none"; 
+    document.getElementById("selecaoPerfis").style.display = "flex"; 
+  }
+}
+
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("collapsed");
+  document.getElementById("main").classList.toggle("expanded");
+}
+
+function toggleAvatarMenu(){
+  const menu = document.getElementById("avatarMenu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function mostrarSelecaoPerfis(){
+  document.getElementById("catalogo").style.display = "none";
+  document.getElementById("selecaoPerfis").style.display = "flex";
+}
+
+function abrirConfiguracoes(){ 
+  document.getElementById("configModal").style.display="flex"; 
+}
+
+function fecharConfig(){ 
+  document.getElementById("configModal").style.display="none"; 
+}
+
+function mudarTema(theme){ 
+  document.body.className = theme; 
+}
+
+function mudarIdioma(){ 
+  currentLanguage = document.getElementById("idiomaSelect").value; 
+  loadCategories(); 
+}
+
+// NOVA FUNÇÃO: Verifica se um filme tem trailer
+async function hasTrailer(movieId) {
+  try {
+    const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${API_KEY}&language=${currentLanguage}`);
+    if (!response.ok) return false;
+    
+    const data = await response.json();
+    const trailer = data.results?.find(video => video.type === "Trailer") || data.results?.[0];
+    return !!trailer; // Retorna true se tem trailer, false se não tem
+  } catch (error) {
+    return false;
+  }
+}
+
+// NOVA FUNÇÃO: Carrega filmes com trailers para o destaque
+async function loadFeaturedMoviesWithTrailers() {
+  if (isLoadingFeatured) return;
+  isLoadingFeatured = true;
+  
+  try {
+    // Pega filmes populares que têm maior chance de ter trailers
+    const response = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=${currentLanguage}&page=1`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    const popularMovies = data.results || [];
+    
+    featuredMoviesWithTrailers = [];
+    
+    // Verifica os primeiros 20 filmes populares para encontrar aqueles com trailers
+    const moviesToCheck = popularMovies.slice(0, 20);
+    
+    for (const movie of moviesToCheck) {
+      if (await hasTrailer(movie.id)) {
+        featuredMoviesWithTrailers.push(movie);
+        
+        // Para quando tivermos pelo menos 10 filmes com trailers
+        if (featuredMoviesWithTrailers.length >= 10) break;
+      }
+    }
+    
+    // Se não encontrou suficientes filmes populares com trailers, busca em outras páginas
+    if (featuredMoviesWithTrailers.length < 5) {
+      const page2Response = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=${currentLanguage}&page=2`);
+      if (page2Response.ok) {
+        const page2Data = await page2Response.json();
+        const page2Movies = page2Data.results || [];
+        
+        for (const movie of page2Movies.slice(0, 15)) {
+          if (featuredMoviesWithTrailers.length >= 10) break;
+          if (await hasTrailer(movie.id)) {
+            featuredMoviesWithTrailers.push(movie);
+          }
+        }
+      }
+    }
+    
+    console.log(`Carregados ${featuredMoviesWithTrailers.length} filmes com trailers para o destaque`);
+    
+    // Inicia o destaque quando terminar de carregar
+    if (featuredMoviesWithTrailers.length > 0) {
+      showFeatured(0);
+      startFeaturedRotation();
+    } else {
+      // Fallback: se não encontrou nenhum com trailer, usa filmes populares mesmo assim
+      featuredMoviesWithTrailers = popularMovies.slice(0, 5);
+      showFeatured(0);
+      startFeaturedRotation();
+    }
+    
+  } catch (error) {
+    console.error("Erro ao carregar filmes em destaque:", error);
+    // Fallback em caso de erro
+    document.getElementById("destaque-titulo").textContent = "Erro ao carregar filmes";
+    document.getElementById("destaque-descricao").textContent = "Tente novamente mais tarde";
+  }
+  
+  isLoadingFeatured = false;
+}
+
+async function loadCategories(){
+  try {
+    categories = movieCategories;
+    moviesByCategory = {};
+
+    const sidebar = document.getElementById("sidebar");
+    sidebar.innerHTML = "<h2>Categorias</h2>";
+    
+    // Botão "Todas"
+    const allBtn = document.createElement("button");
+    allBtn.textContent = "Todas";
+    allBtn.classList.add("active");
+    allBtn.onclick = () => showAllCategories();
+    sidebar.appendChild(allBtn);
+
+    categories.forEach(category => {
+      const btn = document.createElement("button");
+      btn.textContent = category.name;
+      btn.onclick = (event) => filterByCategory(category.id, event);
+      sidebar.appendChild(btn);
+    });
+
+    const main = document.getElementById("main");
+    const existingCategories = main.querySelectorAll('.categoria');
+    existingCategories.forEach(cat => cat.remove());
+
+    // Carrega filmes em destaque em paralelo
+    loadFeaturedMoviesWithTrailers();
+
+    for(const category of categories){
+      await loadMovies(category.id, category.name);
+    }
+
+  } catch (error) {
+    console.error("Erro ao carregar categorias:", error);
+  }
+}
+
+async function loadMovies(categoryId, categoryName){
+  try {
+    const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=${currentLanguage}&with_genres=${categoryId}`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    const movies = data.results || [];
+    moviesByCategory[categoryId] = movies;
+
+    const main = document.getElementById("main");
+    const categoryDiv = document.createElement("div");
+    categoryDiv.classList.add("categoria");
+    categoryDiv.id = `categoria-${categoryId}`;
+    categoryDiv.innerHTML = `<h3>${categoryName}</h3><div class="scroll-horizontal"></div>`;
+    main.appendChild(categoryDiv);
+
+    const scrollDiv = categoryDiv.querySelector(".scroll-horizontal");
+    movies.forEach(movie => {
+      const card = document.createElement("div");
+      card.classList.add("card-filme");
+      const movieTitle = movie.title || movie.original_title || "Título não disponível";
+      const movieOverview = movie.overview || "Descrição não disponível";
+      
+      card.innerHTML = `
+        <img src="${movie.poster_path ? IMG_BASE + movie.poster_path : 'https://via.placeholder.com/160x240?text=Sem+Imagem'}" 
+             alt="${movieTitle}" 
+             onerror="this.src='https://via.placeholder.com/160x240?text=Sem+Imagem'">
+        <div class="info">
+          <h4>${movieTitle}</h4>
+          <p>${movieOverview}</p>
+          <button class="btn-trailer" data-id="${movie.id}">▶ Trailer</button>
+        </div>`;
+      scrollDiv.appendChild(card);
+    });
+  } catch (error) {
+    console.error(`Erro ao carregar filmes da categoria ${categoryName}:`, error);
+  }
+}
+
+function showAllCategories(){
+  document.querySelectorAll(".categoria").forEach(category => {
+    category.style.display = "block";
+  });
+  
+  document.querySelectorAll(".sidebar button").forEach(btn => {
+    btn.classList.remove("active");
+  });
+  
+  document.querySelector(".sidebar button").classList.add("active");
+}
+
+function filterByCategory(categoryId, event){
+  document.querySelectorAll(".categoria").forEach(category => {
+    category.style.display = "block";
+  });
+  
+  document.querySelectorAll(".sidebar button").forEach(btn => {
+    btn.classList.remove("active");
+  });
+  
+  if (event && event.target) {
+    event.target.classList.add("active");
+  }
+  
+  const targetCategory = document.getElementById(`categoria-${categoryId}`);
+  if (targetCategory) {
+    targetCategory.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'start' 
+    });
+  }
+}
+
+async function openTrailer(movieId){
+  try {
+    const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${API_KEY}&language=${currentLanguage}`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    const trailer = data.results?.find(video => video.type === "Trailer") || data.results?.[0];
+    
+    if(trailer){
+      document.getElementById("modal-body").innerHTML = 
+        `<iframe src="https://www.youtube.com/embed/${trailer.key}" allowfullscreen></iframe>`;
+      document.getElementById("modal").style.display = "flex";
+    } else {
+      alert("Trailer não disponível");
+    }
+  } catch (error) {
+    console.error("Erro ao carregar trailer:", error);
+    alert("Erro ao carregar trailer");
+  }
+}
+
+function fecharModal(){ 
+  document.getElementById("modal").style.display = "none"; 
+  document.getElementById("modal-body").innerHTML = ""; 
+}
+
+// FUNÇÃO ATUALIZADA: Agora usa apenas filmes com trailers
+function showFeatured(index){
+  if(featuredMoviesWithTrailers.length === 0) return;
+  
+  featuredIndex = ((index % featuredMoviesWithTrailers.length) + featuredMoviesWithTrailers.length) % featuredMoviesWithTrailers.length;
+  const featuredMovie = featuredMoviesWithTrailers[featuredIndex];
+  
+  if (featuredMovie) {
+    const destaqueElement = document.getElementById("destaque");
+    const backgroundImage = featuredMovie.backdrop_path ? 
+      `${IMG_BASE}${featuredMovie.backdrop_path}` : 
+      'https://via.placeholder.com/1920x1080?text=Sem+Imagem';
+    
+    destaqueElement.style.backgroundImage = `url(${backgroundImage})`;
+    
+    document.getElementById("destaque-titulo").textContent = 
+      featuredMovie.title || featuredMovie.original_title || "Título não disponível";
+    document.getElementById("destaque-descricao").textContent = 
+      featuredMovie.overview || "Descrição não disponível";
+    
+    const btnTrailer = document.getElementById("btn-destaque-trailer");
+    btnTrailer.onclick = () => openTrailer(featuredMovie.id);
+    btnTrailer.setAttribute('data-movie-id', featuredMovie.id);
+    btnTrailer.innerHTML = `▶ Assistir Trailer - ${featuredMovie.title || featuredMovie.original_title || "Filme"}`;
+  }
+}
+
+function mudarDestaque(direction){ 
+  if (featuredMoviesWithTrailers.length > 0) {
+    showFeatured(featuredIndex + direction); 
+  }
+}
+
+function startFeaturedRotation(){
+  if(featuredInterval) clearInterval(featuredInterval);
+  if (featuredMoviesWithTrailers.length > 0) {
+    featuredInterval = setInterval(() => mudarDestaque(1), 6000);
+  }
+}
+
+function filtrarFilmes(){
+  const searchTerm = document.getElementById("searchBar").value.toLowerCase();
+  const destaqueElement = document.getElementById("destaque");
+  
+  destaqueElement.style.display = searchTerm ? "none" : "flex";
+  
+  document.querySelectorAll(".card-filme").forEach(card => {
+    const titleElement = card.querySelector("h4");
+    if (titleElement) {
+      const movieTitle = titleElement.textContent.toLowerCase();
+      card.style.display = movieTitle.includes(searchTerm) ? "flex" : "none";
+    }
+  });
+}
+
+function sair(){ 
+  location.reload(); 
+}
+
+window.onload = () => {
+  setTimeout(() => {
+    const intro = document.querySelector(".intro");
+    if (intro) {
+      intro.style.display = "none";
+    }
+  }, 5000);
+  
+  const savedLanguage = "pt-BR";
+  currentLanguage = savedLanguage;
+  document.getElementById("idiomaSelect").value = currentLanguage;
+};
+
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("btn-trailer")) {
+    const id = e.target.getAttribute("data-id");
+    if (!id) {
+      console.error("ERRO: O botão não tem ID!");
+      alert("Trailer indisponível para este filme.");
+      return;
+    }
+    openTrailer(id);
+  }
+});
+
+</script>
+</body>
+</html>
