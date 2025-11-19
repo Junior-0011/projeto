@@ -1,0 +1,73 @@
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Joãoflix</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="intro"><h1>JOÃOFLIX</h1></div>
+
+    <div id="login">
+        <input type="email" placeholder="Email" id="email" />
+        <input type="password" placeholder="Senha" id="senha" />
+        <button onclick="fazerLogin()">Entrar</button>
+    </div>
+
+    <div id="selecaoPerfis">
+        <h2>Quem está assistindo?</h2>
+        <div class="perfis" id="listaPerfis"></div>
+    </div>
+
+    <div id="catalogo">
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+        <header>
+            <h1>Joãoflix</h1>
+            <input type="text" id="searchBar" placeholder="Buscar título..." oninput="filtrarFilmes()" />
+            <div class="avatar-wrapper">
+                <img id="avatarSidebar" src="" alt="Avatar" style="width:50px; height:50px; border-radius:50%; box-shadow: 0 0 8px #e50914; cursor:pointer;" onclick="toggleAvatarMenu()" />
+                <div class="avatar-menu" id="avatarMenu">
+                    <button onclick="mostrarSelecaoPerfis()">👥 Trocar de Perfil</button>
+                    <button onclick="abrirConfiguracoes()">⚙️ Configurações</button>
+                    <button onclick="sair()">🚪 Sair</button>
+                </div>
+            </div>
+        </header>
+        <div class="sidebar" id="sidebar"><h2>Categorias</h2></div>
+        <div class="main" id="main">
+            <div id="destaque">
+                <span class="seta seta-esq" onclick="mudarDestaque(-1)">&#10094;</span>
+                <span class="seta seta-dir" onclick="mudarDestaque(1)">&#10095;</span>
+                <div class="conteudo-destaque">
+                    <h2 id="destaque-titulo">Carregando filmes com trailers...</h2>
+                    <p id="destaque-descricao">Aguarde enquanto buscamos filmes com trailers disponíveis</p>
+                    <button id="btn-destaque-trailer">▶ Assistir Trailer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="configModal">
+        <div class="modal-content">
+            <button class="close" onclick="fecharConfig()">×</button>
+            <h2 style="color:white; margin-bottom: 15px;">Configurações</h2>
+            <div style="margin-bottom: 20px;">
+                <label style="color:white;">🌗 Tema:</label><br>
+                <button onclick="mudarTema('dark')">Escuro</button>
+                <button onclick="mudarTema('light')">Claro</button>
+            </div>
+            <div>
+                <label style="color:white;">🌍 Idioma:</label><br>
+                <select id="idiomaSelect" onchange="mudarIdioma()">
+                    <option value="pt-BR">Português</option>
+                    <option value="en-US">English</option>
+                    <option value="es-ES">Español</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+  </html>
